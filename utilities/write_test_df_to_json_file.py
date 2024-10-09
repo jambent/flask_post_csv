@@ -1,8 +1,4 @@
-import polars as pl
-
-test_df = pl.DataFrame({"id": [101, 102, 103, 104, 105],
-                        "name": ["James", "Dan", "Lisa", "Yvonne", "Ken"],
-                        "age": [22, 25, 23, 28, 32], })
+from test_data.test_dataframe import test_df
 
 
 if __name__ == "__main__":

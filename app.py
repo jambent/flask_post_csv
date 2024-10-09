@@ -1,37 +1,44 @@
-from flask import Flask, request, render_template, redirect, url_for
+"""
+Allows user to select local JSON file for upload, which is then converted to
+a DataFrame, before being converted to a CSV file and uploaded to
+the uploaded_files folder
+"""
+
+import os
+import datetime as dt
 import polars as pl
-from src.create_csv_bytes_object_from_dataframe \
-    import create_csv_bytes_object_from_dataframe
+from flask import Flask, request, render_template
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 
 
-# For testing Postman connectivity, only
-# @app.route('/')
-# def home():
-#     return "Postman check successful"
 @app.route('/')
 def home():
     return "Main page"
 
-@app.route('/upload', methods = ['GET','POST'])
+
+@app.route('/upload', methods=['GET', 'POST'])
 def upload_table():
 
     if request.method == 'POST':
-        return redirect(url_for('download'))
 
-        # data = request.get_json()
-        # df = pl.DataFrame(data)
-        # csv_bytes = create_csv_bytes_object_from_dataframe(df)
-        # return send_file(
-        #     csv_bytes,
-        #     mimetype='text/csv',
-        #     as_attachment=True,
-        #     attachment_filename=f'{table_id}.csv'
-        # )
+        file = request.files['file']
+
+        transition_df = pl.read_json(file)
+
+        filename = secure_filename(file.filename)
+        new_filename = f"{
+            filename.split(".")[0]}_{
+            str(
+                dt.datetime.now().isoformat(
+                    timespec='hours'))}.csv"
+        save_location = os.path.join('uploaded_files', new_filename)
+
+        transition_df.write_csv(save_location)
+
     return render_template('upload_csv.html')
-        
 
 
 if __name__ == '__main__':
-    app.run(debug = True)
+    app.run()
